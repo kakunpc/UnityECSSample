@@ -22,7 +22,7 @@ public class ECSMain : MonoBehaviour
     private int _createNum = 100;
 
     private EntityManager entityManager;
-    private EntityArchetype snowFlakeArch;
+    private EntityArchetype fallCubeArch;
     
     private int _createCount = 0;
     
@@ -32,7 +32,7 @@ public class ECSMain : MonoBehaviour
         entityManager = World.Active.GetOrCreateManager<EntityManager>();
 
         // Entityのアーキタイプを定義
-        snowFlakeArch = entityManager.CreateArchetype(
+        fallCubeArch = entityManager.CreateArchetype(
             typeof(TransformMatrix),
             typeof(MeshInstanceRenderer),
             typeof(FallCubeData),
@@ -47,7 +47,7 @@ public class ECSMain : MonoBehaviour
     {
         // アーキタイプを元にEntityを実際に生成
         var array = new NativeArray<Entity>(_createNum, Allocator.TempJob);
-        entityManager.CreateEntity(snowFlakeArch, array);
+        entityManager.CreateEntity(fallCubeArch, array);
         foreach (var entity in array)
         {
             entityManager.SetComponentData(entity, new FallCubeData
