@@ -11,7 +11,7 @@ public class FallCubeJob : JobComponentSystem
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
         var job = new JobFall {dt = Time.deltaTime};
-        return job.Schedule(this, 64, inputDeps);
+        return  job.Schedule(this, inputDeps);
     }
 
     struct JobFall : IJobProcessComponentData<Position, Rotation, FallCubeData>

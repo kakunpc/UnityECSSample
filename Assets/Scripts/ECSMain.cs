@@ -6,6 +6,7 @@ using Unity.Mathematics;
 using Unity.Rendering;
 using Unity.Transforms;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class ECSMain : MonoBehaviour
 {
@@ -33,7 +34,6 @@ public class ECSMain : MonoBehaviour
 
         // Entityのアーキタイプを定義
         fallCubeArch = entityManager.CreateArchetype(
-            typeof(TransformMatrix),
             typeof(MeshInstanceRenderer),
             typeof(FallCubeData),
             typeof(Position),
@@ -55,9 +55,18 @@ public class ECSMain : MonoBehaviour
                 fallSpeed = Random.Range(1f, 10f),
                 rotationSpeed = Random.Range(-50f, 50f)
             });
-            entityManager.SetComponentData(entity, new Position(new float3(Random.Range(-100, 100),Random.Range(-100, 100),Random.Range(-100, 100))));
+            
+            entityManager.SetComponentData(
+                entity,
+                new Position
+                {
+                    Value = new float3(Random.Range(-100, 100), Random.Range(-100, 100), Random.Range(-100, 100))
+                });
             entityManager.SetComponentData(entity,
-                new Rotation(Quaternion.AngleAxis(Random.Range(1, 360), Vector3.up)));
+                                           new Rotation
+                                           {
+                                               Value = Quaternion.AngleAxis(Random.Range(1, 360), Vector3.up)
+                                           });
             entityManager.SetSharedComponentData(entity, new MeshInstanceRenderer
             {
                 mesh = _mesh,
@@ -77,5 +86,5 @@ public class ECSMain : MonoBehaviour
             Create();
         }
     }
-    
+
 }
