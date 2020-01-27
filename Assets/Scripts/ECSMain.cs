@@ -11,12 +11,6 @@ using Random = UnityEngine.Random;
 public class ECSMain : MonoBehaviour
 {
     [SerializeField]
-    private Mesh _mesh;
-    
-    [SerializeField]
-    private Material _material;
-    
-    [SerializeField]
     private Text _counter;
 
     [SerializeField]
@@ -30,15 +24,16 @@ public class ECSMain : MonoBehaviour
     void Start()
     {
         // EntityManagerを取得
-        entityManager = World.Active.GetOrCreateManager<EntityManager>();
+        entityManager = World.Active.EntityManager;
 
         // Entityのアーキタイプを定義
         fallCubeArch = entityManager.CreateArchetype(
-            typeof(MeshInstanceRenderer),
-            typeof(FallCubeData),
-            typeof(Position),
-            typeof(Rotation));
-
+            ComponentType.ReadWrite<LocalToWorld>(), 
+            ComponentType.ReadWrite<Translation>(),
+            ComponentType.ReadWrite<Rotation>(),
+            ComponentType.ReadWrite<FallCubeData>(),
+            ComponentType.ReadOnly<RenderMesh>());
+            
         // FirstCreate
         Create();
     }
@@ -48,6 +43,9 @@ public class ECSMain : MonoBehaviour
         // アーキタイプを元にEntityを実際に生成
         var array = new NativeArray<Entity>(_createNum, Allocator.TempJob);
         entityManager.CreateEntity(fallCubeArch, array);
+        
+        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        
         foreach (var entity in array)
         {
             entityManager.SetComponentData(entity, new FallCubeData
@@ -58,7 +56,7 @@ public class ECSMain : MonoBehaviour
             
             entityManager.SetComponentData(
                 entity,
-                new Position
+                new Translation
                 {
                     Value = new float3(Random.Range(-100, 100), Random.Range(-100, 100), Random.Range(-100, 100))
                 });
@@ -67,21 +65,26 @@ public class ECSMain : MonoBehaviour
                                            {
                                                Value = Quaternion.AngleAxis(Random.Range(1, 360), Vector3.up)
                                            });
-            entityManager.SetSharedComponentData(entity, new MeshInstanceRenderer
+            entityManager.SetSharedComponentData(entity, new RenderMesh
             {
-                mesh = _mesh,
-                material = _material
+                mesh = cube.GetComponent<MeshFilter>().sharedMesh,
+                material = cube.GetComponent<MeshRenderer>().sharedMaterial,
+                subMesh = 0,
+                castShadows = UnityEngine.Rendering.ShadowCastingMode.Off,
+                receiveShadows = false
             });
         }
         array.Dispose();
 
         _createCount += _createNum;
         _counter.text = _createCount.ToString();
+        
+        Destroy(cube);
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space) || OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger))
+        if (Input.GetKeyDown(KeyCode.Space) /*|| OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger)*/)
         {
             Create();
         }

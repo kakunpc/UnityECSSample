@@ -10,14 +10,14 @@ public class FallCubeJob : JobComponentSystem
 {
     protected override JobHandle OnUpdate(JobHandle inputDeps)
     {
-        var job = new JobFall {dt = Time.deltaTime};
+        var job = new JobFall {dt = Time.DeltaTime};
         return  job.Schedule(this, inputDeps);
     }
 
-    struct JobFall : IJobProcessComponentData<Position, Rotation, FallCubeData>
+    struct JobFall : IJobForEach<Translation, Rotation, FallCubeData>
     {
         public float dt;
-        public void Execute(ref Position pos, ref Rotation rot, ref FallCubeData data)
+        public void Execute(ref Translation pos, ref Rotation rot, ref FallCubeData data)
         {
             pos.Value.y -= data.fallSpeed * dt;
             if (pos.Value.y <= -100)
